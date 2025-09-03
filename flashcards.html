@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic Knowledge Quiz - Grade 7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+        
+        .arabic-font { font-family: 'Amiri', serif; }
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .flip-card-back { transform: rotateY(180deg); }
+        
+        .islamic-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+        }
+        
+        .star-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.05'%3E%3Cpath d='M30 30l15-15v30l-15-15zm0 0l-15 15h30l-15-15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 star-pattern">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-600 to-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-3xl">🕌</div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Islamic Knowledge Quiz</h1>
+                        <p class="text-emerald-100 text-sm">Grade 7 Interactive Flashcards</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-semibold">Score: <span id="score">0</span></div>
+                    <div class="text-sm text-emerald-100">Card <span id="currentCard">1</span> of <span id="totalCards">10</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Quiz Card -->
+        <div class="max-w-2xl mx-auto">
+            <div class="flip-card h-96 mb-8" id="flashCard">
+                <div class="flip-card-inner">
+                    <!-- Front of Card (Question) -->
+                    <div class="flip-card-front bg-white shadow-xl border-l-4 border-emerald-500 islamic-pattern">
+                        <div class="h-full flex flex-col justify-center items-center p-8">
+                            <div class="text-emerald-600 text-4xl mb-4">📖</div>
+                            <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center" id="questionText">
+                                What are the Five Pillars of Islam?
+                            </h2>
+                            <p class="text-gray-600 text-center mb-6">Click the card to reveal the answer</p>
+                            <div class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
+                                Question
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Back of Card (Answer) -->
+                    <div class="flip-card-back bg-gradient-to-br from-blue-500 to-emerald-500 text-white shadow-xl">
+                        <div class="h-full flex flex-col justify-center items-center p-8">
+                            <div class="text-4xl mb-4">✨</div>
+                            <div class="text-center" id="answerText">
+                                <p class="text-lg font-medium mb-4">The Five Pillars are:</p>
+                                <ul class="text-left space-y-2">
+                                    <li>1. Shahada (Declaration of Faith)</li>
+                                    <li>2. Salah (Prayer)</li>
+                                    <li>3. Zakat (Charity)</li>
+                                    <li>4. Sawm (Fasting during Ramadan)</li>
+                                    <li>5. Hajj (Pilgrimage to Mecca)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-full text-sm font-medium mt-4">
+                                Answer
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button onclick="flipCard()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg">
+                    🔄 Flip Card
+                </button>
+                <button onclick="markCorrect()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg">
+                    ✅ Got It Right
+                </button>
+                <button onclick="markIncorrect()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg">
+                    ❌ Need Practice
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center">
+                <button onclick="previousCard()" id="prevBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    ⬅️ Previous
+                </button>
+                
+                <div class="flex space-x-2">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full" id="dot0"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot1"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot2"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot3"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot4"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot5"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot6"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot7"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot8"></div>
+                    <div class="w-3 h-3 bg-gray-300 rounded-full" id="dot9"></div>
+                </div>
+                
+                <button onclick="nextCard()" id="nextBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg">
+                    Next ➡️
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Summary -->
+        <div class="max-w-2xl mx-auto mt-12 bg-white rounded-xl shadow-lg p-6 islamic-pattern">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">📊 Your Progress</h3>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="bg-green-100 text-green-700 p-4 rounded-lg">
+                    <div class="text-2xl font-bold" id="correctCount">0</div>
+                    <div class="text-sm">Correct</div>
+                </div>
+                <div class="bg-red-100 text-red-700 p-4 rounded-lg">
+                    <div class="text-2xl font-bold" id="incorrectCount">0</div>
+                    <div class="text-sm">Need Practice</div>
+                </div>
+                <div class="bg-blue-100 text-blue-700 p-4 rounded-lg">
+                    <div class="text-2xl font-bold" id="remainingCount">10</div>
+                    <div class="text-sm">Remaining</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const flashcards = [
+            {
+                question: "What are the Five Pillars of Islam?",
+                answer: "The Five Pillars are:<br>1. Shahada (Declaration of Faith)<br>2. Salah (Prayer)<br>3. Zakat (Charity)<br>4. Sawm (Fasting during Ramadan)<br>5. Hajj (Pilgrimage to Mecca)"
+            },
+            {
+                question: "What is the holy book of Islam?",
+                answer: "The Quran (Al-Qur'an) is the holy book of Islam. It contains the direct words of Allah as revealed to Prophet Muhammad (peace be upon him) through the angel Jibril (Gabriel)."
+            },
+            {
+                question: "How many times do Muslims pray each day?",
+                answer: "Muslims pray five times a day:<br>1. Fajr (Dawn)<br>2. Dhuhr (Midday)<br>3. Asr (Afternoon)<br>4. Maghrib (Sunset)<br>5. Isha (Night)"
+            },
+            {
+                question: "What is the direction Muslims face when praying?",
+                answer: "Muslims face the Qibla, which is the direction toward the Kaaba in Mecca, Saudi Arabia. This sacred direction unites Muslims worldwide in prayer."
+            },
+            {
+                question: "What is Ramadan?",
+                answer: "Ramadan is the ninth month of the Islamic calendar. It is a holy month of fasting, prayer, reflection, and community for Muslims worldwide."
+            },
+            {
+                question: "What does 'Islam' mean?",
+                answer: "Islam means 'submission' or 'surrender' to Allah. It comes from the Arabic root word 'salaam' which means peace."
+            },
+            {
+                question: "Who was the last Prophet in Islam?",
+                answer: "Prophet Muhammad (peace be upon him) was the last and final messenger of Allah. He lived from 570 to 632 CE in Arabia."
+            },
+            {
+                question: "What is the Kaaba?",
+                answer: "The Kaaba is a cube-shaped building in Mecca, Saudi Arabia. It is the most sacred site in Islam and the direction Muslims face during prayer."
+            },
+            {
+                question: "What is Zakat?",
+                answer: "Zakat is the third pillar of Islam. It is a form of charity where Muslims give a portion of their wealth (usually 2.5%) to help those in need."
+            },
+            {
+                question: "What language was the Quran revealed in?",
+                answer: "The Quran was revealed in Arabic. Muslims around the world learn Arabic to read and understand the Quran in its original language."
+            }
+        ];
+
+        let currentCardIndex = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let cardStates = new Array(flashcards.length).fill('unanswered'); // 'correct', 'incorrect', 'unanswered'
+
+        function updateCard() {
+            const card = flashcards[currentCardIndex];
+            document.getElementById('questionText').textContent = card.question;
+            document.getElementById('answerText').innerHTML = card.answer;
+            document.getElementById('currentCard').textContent = currentCardIndex + 1;
+            document.getElementById('totalCards').textContent = flashcards.length;
+            
+            // Reset card to front
+            document.getElementById('flashCard').classList.remove('flipped');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentCardIndex === 0;
+            document.getElementById('nextBtn').disabled = currentCardIndex === flashcards.length - 1;
+            
+            // Update progress dots
+            updateProgressDots();
+            updateProgressSummary();
+        }
+
+        function updateProgressDots() {
+            for (let i = 0; i < flashcards.length; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                if (i === currentCardIndex) {
+                    dot.className = 'w-3 h-3 bg-emerald-500 rounded-full';
+                } else if (cardStates[i] === 'correct') {
+                    dot.className = 'w-3 h-3 bg-green-500 rounded-full';
+                } else if (cardStates[i] === 'incorrect') {
+                    dot.className = 'w-3 h-3 bg-red-500 rounded-full';
+                } else {
+                    dot.className = 'w-3 h-3 bg-gray-300 rounded-full';
+                }
+            }
+        }
+
+        function updateProgressSummary() {
+            const correct = cardStates.filter(state => state === 'correct').length;
+            const incorrect = cardStates.filter(state => state === 'incorrect').length;
+            const remaining = cardStates.filter(state => state === 'unanswered').length;
+            
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('remainingCount').textContent = remaining;
+        }
+
+        function flipCard() {
+            document.getElementById('flashCard').classList.toggle('flipped');
+        }
+
+        function markCorrect() {
+            if (cardStates[currentCardIndex] === 'unanswered') {
+                score += 10;
+                correctAnswers++;
+            } else if (cardStates[currentCardIndex] === 'incorrect') {
+                score += 10;
+                correctAnswers++;
+                incorrectAnswers--;
+            }
+            
+            cardStates[currentCardIndex] = 'correct';
+            document.getElementById('score').textContent = score;
+            updateProgressDots();
+            updateProgressSummary();
+            
+            // Auto advance after a short delay
+            setTimeout(() => {
+                if (currentCardIndex < flashcards.length - 1) {
+                    nextCard();
+                }
+            }, 1000);
+        }
+
+        function markIncorrect() {
+            if (cardStates[currentCardIndex] === 'unanswered') {
+                incorrectAnswers++;
+            } else if (cardStates[currentCardIndex] === 'correct') {
+                score -= 10;
+                correctAnswers--;
+                incorrectAnswers++;
+            }
+            
+            cardStates[currentCardIndex] = 'incorrect';
+            document.getElementById('score').textContent = score;
+            updateProgressDots();
+            updateProgressSummary();
+        }
+
+        function nextCard() {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                updateCard();
+            }
+        }
+
+        function previousCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateCard();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case ' ':
+                case 'Enter':
+                    event.preventDefault();
+                    flipCard();
+                    break;
+                case 'ArrowRight':
+                    nextCard();
+                    break;
+                case 'ArrowLeft':
+                    previousCard();
+                    break;
+                case '1':
+                    markCorrect();
+                    break;
+                case '2':
+                    markIncorrect();
+                    break;
+            }
+        });
+
+        // Click card to flip
+        document.getElementById('flashCard').addEventListener('click', flipCard);
+
+        // Initialize
+        updateCard();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9791116ca3d74a41',t:'MTc1Njg1ODY4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
