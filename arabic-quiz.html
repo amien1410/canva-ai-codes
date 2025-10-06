@@ -319,6 +319,67 @@
             transform: scale(1);
         }
 
+        /* Language Selection Styles */
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            border-color: #2dd4bf;
+            color: #2dd4bf;
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #2dd4bf, #0891b2);
+            color: white;
+            border-color: #2dd4bf;
+            transform: scale(1.05);
+        }
+
+        /* Progress Chart Styles */
+        .score-bar {
+            background: linear-gradient(to top, #ef4444, #fbbf24, #10b981);
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .score-bar:hover {
+            transform: scaleY(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-bar::after {
+            content: attr(data-score);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .score-bar:hover::after {
+            opacity: 1;
+        }
+
         @media (max-width: 768px) {
             .calligraphy-bg {
                 font-size: 4rem;
@@ -344,18 +405,58 @@
 
     <!-- Welcome Page -->
     <div id="welcome-page" class="min-h-screen flex items-center justify-center p-4">
-        <div class="quiz-card rounded-3xl p-8 max-w-md w-full text-center fade-in">
+        <div class="quiz-card rounded-3xl p-8 max-w-lg w-full text-center fade-in">
+            <!-- Language Selection -->
             <div class="mb-6">
-                <h1 class="text-4xl font-bold text-gray-800 mb-2">اختبار النحو العربي</h1>
-                <p class="text-lg text-gray-600">للصف السابع الأساسي</p>
+                <h3 class="text-lg font-semibold text-gray-700 mb-3" id="lang-select-title">اختر لغة التعليمات</h3>
+                <div class="flex justify-center gap-3 mb-4">
+                    <button onclick="setLanguage('ar')" class="lang-btn active" data-lang="ar">
+                        🇸🇦 العربية
+                    </button>
+                    <button onclick="setLanguage('en')" class="lang-btn" data-lang="en">
+                        🇺🇸 English
+                    </button>
+                    <button onclick="setLanguage('id')" class="lang-btn" data-lang="id">
+                        🇮🇩 Indonesia
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2" id="main-title">اختبار النحو العربي</h1>
+                <p class="text-lg text-gray-600" id="subtitle">للصف السابع الأساسي</p>
             </div>
             
             <div class="mb-8">
                 <div class="text-6xl mb-4">📚</div>
-                <p class="text-gray-700 leading-relaxed">
+                <p class="text-gray-700 leading-relaxed" id="welcome-description">
                     مرحباً بك في اختبار النحو العربي الممتع!<br>
                     ستتعلم عن المفرد والمثنى والجمع
                 </p>
+            </div>
+
+            <!-- Progress History -->
+            <div id="progress-history" class="mb-6 hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-200">
+                    <h3 class="text-lg font-bold text-blue-800 mb-3" id="progress-title">📊 تقدمك في الاختبارات</h3>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-blue-600" id="attempts-label">عدد المحاولات:</span>
+                        <span class="font-bold text-blue-800" id="attempts-count">0</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-blue-600" id="best-score-label">أفضل نتيجة:</span>
+                        <span class="font-bold text-green-600" id="best-score">0/100</span>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                            <span id="progress-chart-label">آخر 5 محاولات</span>
+                            <span id="improvement-text"></span>
+                        </div>
+                        <div class="flex gap-1 h-8" id="score-chart">
+                            <!-- Score bars will be generated here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-4">
@@ -369,6 +470,7 @@
                 <button 
                     onclick="startQuiz()" 
                     class="w-full bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold py-4 px-6 rounded-xl hover:from-teal-500 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 text-lg"
+                    id="start-btn"
                 >
                     ابدأ الاختبار 🚀
                 </button>
@@ -437,6 +539,91 @@
     </div>
 
     <script>
+        // Language translations
+        const translations = {
+            ar: {
+                langSelectTitle: "اختر لغة التعليمات",
+                mainTitle: "اختبار النحو العربي",
+                subtitle: "للصف السابع الأساسي",
+                welcomeDescription: "مرحباً بك في اختبار النحو العربي الممتع!<br>ستتعلم عن المفرد والمثنى والجمع",
+                progressTitle: "📊 تقدمك في الاختبارات",
+                attemptsLabel: "عدد المحاولات:",
+                bestScoreLabel: "أفضل نتيجة:",
+                progressChartLabel: "آخر 5 محاولات",
+                namePlaceholder: "اكتب اسمك هنا...",
+                startBtn: "ابدأ الاختبار 🚀",
+                nameRequired: "من فضلك اكتب اسمك أولاً",
+                selectThree: "اختر 3 كلمات صحيحة",
+                selectThreeAlert: "من فضلك اختر 3 كلمات",
+                dragAllWords: "من فضلك ضع جميع الكلمات في المجموعات المناسبة",
+                progressText: "السؤال {current} من {total}",
+                previous: "← السابق",
+                next: "التالي →",
+                finish: "إنهاء الاختبار 🎯",
+                excellent: "أحسنت!",
+                yourResult: "{name}، نتيجتك هي:",
+                restartQuiz: "إعادة الاختبار 🔄",
+                improving: "📈 تحسن!",
+                declining: "📉 حاول أكثر"
+            },
+            en: {
+                langSelectTitle: "Choose Instruction Language",
+                mainTitle: "Arabic Grammar Quiz",
+                subtitle: "For 7th Grade Students",
+                welcomeDescription: "Welcome to the fun Arabic Grammar Quiz!<br>You will learn about singular, dual, and plural forms",
+                progressTitle: "📊 Your Quiz Progress",
+                attemptsLabel: "Attempts:",
+                bestScoreLabel: "Best Score:",
+                progressChartLabel: "Last 5 Attempts",
+                namePlaceholder: "Enter your name here...",
+                startBtn: "Start Quiz 🚀",
+                nameRequired: "Please enter your name first",
+                selectThree: "Select 3 correct words",
+                selectThreeAlert: "Please select 3 words",
+                dragAllWords: "Please place all words in appropriate categories",
+                progressText: "Question {current} of {total}",
+                previous: "← Previous",
+                next: "Next →",
+                finish: "Finish Quiz 🎯",
+                excellent: "Well Done!",
+                yourResult: "{name}, your result is:",
+                restartQuiz: "Restart Quiz 🔄",
+                improving: "📈 Improving!",
+                declining: "📉 Keep trying"
+            },
+            id: {
+                langSelectTitle: "Pilih Bahasa Instruksi",
+                mainTitle: "Kuis Tata Bahasa Arab",
+                subtitle: "Untuk Siswa Kelas 7",
+                welcomeDescription: "Selamat datang di Kuis Tata Bahasa Arab yang menyenangkan!<br>Anda akan belajar tentang bentuk tunggal, dual, dan jamak",
+                progressTitle: "📊 Kemajuan Kuis Anda",
+                attemptsLabel: "Percobaan:",
+                bestScoreLabel: "Skor Terbaik:",
+                progressChartLabel: "5 Percobaan Terakhir",
+                namePlaceholder: "Masukkan nama Anda di sini...",
+                startBtn: "Mulai Kuis 🚀",
+                nameRequired: "Silakan masukkan nama Anda terlebih dahulu",
+                selectThree: "Pilih 3 kata yang benar",
+                selectThreeAlert: "Silakan pilih 3 kata",
+                dragAllWords: "Silakan tempatkan semua kata dalam kategori yang sesuai",
+                progressText: "Pertanyaan {current} dari {total}",
+                previous: "← Sebelumnya",
+                next: "Selanjutnya →",
+                finish: "Selesaikan Kuis 🎯",
+                excellent: "Bagus Sekali!",
+                yourResult: "{name}, hasil Anda adalah:",
+                restartQuiz: "Ulangi Kuis 🔄",
+                improving: "📈 Membaik!",
+                declining: "📉 Terus coba"
+            }
+        };
+
+        // Current language
+        let currentLanguage = 'ar';
+
+        // Progress tracking
+        let quizHistory = JSON.parse(localStorage.getItem('arabicQuizHistory')) || [];
+
         // Quiz data
         const quizData = {
             mufrad: {
@@ -538,12 +725,126 @@
         let userAnswers = [];
         const quizKeys = Object.keys(quizData);
 
+        // Language and Progress Functions
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active language button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update text content
+            updateLanguageContent();
+        }
+
+        function updateLanguageContent() {
+            const t = translations[currentLanguage];
+            
+            document.getElementById('lang-select-title').textContent = t.langSelectTitle;
+            document.getElementById('main-title').textContent = t.mainTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('welcome-description').innerHTML = t.welcomeDescription;
+            document.getElementById('progress-title').textContent = t.progressTitle;
+            document.getElementById('attempts-label').textContent = t.attemptsLabel;
+            document.getElementById('best-score-label').textContent = t.bestScoreLabel;
+            document.getElementById('progress-chart-label').textContent = t.progressChartLabel;
+            document.getElementById('student-name').placeholder = t.namePlaceholder;
+            document.getElementById('start-btn').textContent = t.startBtn;
+        }
+
+        function loadProgressHistory() {
+            if (quizHistory.length > 0) {
+                document.getElementById('progress-history').classList.remove('hidden');
+                
+                // Update attempts count
+                document.getElementById('attempts-count').textContent = quizHistory.length;
+                
+                // Update best score
+                const bestScore = Math.max(...quizHistory.map(h => h.score));
+                document.getElementById('best-score').textContent = `${bestScore}/100`;
+                
+                // Generate score chart for last 5 attempts
+                generateScoreChart();
+                
+                // Show improvement indicator
+                showImprovementIndicator();
+            }
+        }
+
+        function generateScoreChart() {
+            const chartContainer = document.getElementById('score-chart');
+            const lastFiveScores = quizHistory.slice(-5);
+            
+            chartContainer.innerHTML = '';
+            
+            lastFiveScores.forEach((attempt, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'score-bar';
+                bar.style.width = '20%';
+                bar.style.height = `${(attempt.score / 100) * 100}%`;
+                bar.dataset.score = `${attempt.score}/100`;
+                
+                // Color based on score
+                if (attempt.score >= 80) {
+                    bar.style.background = '#10b981'; // Green
+                } else if (attempt.score >= 60) {
+                    bar.style.background = '#fbbf24'; // Yellow
+                } else {
+                    bar.style.background = '#ef4444'; // Red
+                }
+                
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        function showImprovementIndicator() {
+            const improvementText = document.getElementById('improvement-text');
+            const t = translations[currentLanguage];
+            
+            if (quizHistory.length >= 2) {
+                const lastScore = quizHistory[quizHistory.length - 1].score;
+                const previousScore = quizHistory[quizHistory.length - 2].score;
+                
+                if (lastScore > previousScore) {
+                    improvementText.textContent = t.improving;
+                    improvementText.className = 'text-green-600 font-bold';
+                } else if (lastScore < previousScore) {
+                    improvementText.textContent = t.declining;
+                    improvementText.className = 'text-orange-600 font-bold';
+                } else {
+                    improvementText.textContent = '';
+                }
+            }
+        }
+
+        function saveQuizResult(score) {
+            const attempt = {
+                date: new Date().toISOString(),
+                score: score,
+                studentName: studentName
+            };
+            
+            quizHistory.push(attempt);
+            localStorage.setItem('arabicQuizHistory', JSON.stringify(quizHistory));
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            updateLanguageContent();
+            loadProgressHistory();
+        });
+
         function startQuiz() {
             const nameInput = document.getElementById('student-name');
             studentName = nameInput.value.trim();
+            const t = translations[currentLanguage];
             
             if (!studentName) {
-                alert('من فضلك اكتب اسمك أولاً');
+                alert(t.nameRequired);
                 return;
             }
 
@@ -580,7 +881,7 @@
                     <div class="text-center mb-8">
                         <h2 class="text-3xl font-bold text-gray-800 mb-4">${questionData.title}</h2>
                         <p class="text-lg text-gray-600 mb-6">${questionData.description}</p>
-                        <div class="text-sm text-gray-500">اختر 3 كلمات صحيحة</div>
+                        <div class="text-sm text-gray-500">${translations[currentLanguage].selectThree}</div>
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -595,7 +896,7 @@
                     </div>
                     
                     <div class="text-center">
-                        <div id="selection-count" class="text-sm text-gray-500">تم اختيار 0 من 3</div>
+                        <div id="selection-count" class="text-sm text-gray-500"></div>
                     </div>
                 </div>
             `;
@@ -621,7 +922,7 @@
                     <div class="text-center mb-8">
                         <h2 class="text-3xl font-bold text-gray-800 mb-4">${questionData.title}</h2>
                         <p class="text-lg text-gray-600 mb-6">${questionData.description}</p>
-                        <div class="text-sm text-gray-500">اسحب كل كلمة إلى المجموعة المناسبة</div>
+                        <div class="text-sm text-gray-500">${translations[currentLanguage].dragAllWords}</div>
                     </div>
                     
                     <!-- Word Bank -->
@@ -685,12 +986,21 @@
 
         function updateSelectionCount() {
             const selectedCount = document.querySelectorAll('.option-btn.selected').length;
-            document.getElementById('selection-count').textContent = `تم اختيار ${selectedCount} من 3`;
+            const t = translations[currentLanguage];
+            
+            if (currentLanguage === 'ar') {
+                document.getElementById('selection-count').textContent = `تم اختيار ${selectedCount} من 3`;
+            } else if (currentLanguage === 'en') {
+                document.getElementById('selection-count').textContent = `Selected ${selectedCount} of 3`;
+            } else {
+                document.getElementById('selection-count').textContent = `Dipilih ${selectedCount} dari 3`;
+            }
         }
 
         function nextQuestion() {
             const quizKey = quizKeys[currentQuestion];
             const questionData = quizData[quizKey];
+            const t = translations[currentLanguage];
             
             if (questionData.type === 'drag-drop') {
                 // Check if all words are placed
@@ -698,7 +1008,7 @@
                 const remainingWords = wordBank.querySelectorAll('.draggable-word');
                 
                 if (remainingWords.length > 0) {
-                    alert('من فضلك ضع جميع الكلمات في المجموعات المناسبة');
+                    alert(t.dragAllWords);
                     return;
                 }
                 
@@ -727,7 +1037,7 @@
                 const selectedButtons = document.querySelectorAll('.option-btn.selected');
                 
                 if (selectedButtons.length !== 3) {
-                    alert('من فضلك اختر 3 كلمات');
+                    alert(t.selectThreeAlert);
                     return;
                 }
 
@@ -869,10 +1179,21 @@
                 const remainingWords = wordBank.querySelectorAll('.draggable-word').length;
                 const placedWords = totalWords - remainingWords;
                 
-                progressElement.textContent = `تم وضع ${placedWords} من ${totalWords} كلمة`;
-                
-                if (remainingWords === 0) {
-                    progressElement.innerHTML = `<span class="text-green-600 font-bold">🎉 أحسنت! تم وضع جميع الكلمات</span>`;
+                if (currentLanguage === 'ar') {
+                    progressElement.textContent = `تم وضع ${placedWords} من ${totalWords} كلمة`;
+                    if (remainingWords === 0) {
+                        progressElement.innerHTML = `<span class="text-green-600 font-bold">🎉 أحسنت! تم وضع جميع الكلمات</span>`;
+                    }
+                } else if (currentLanguage === 'en') {
+                    progressElement.textContent = `Placed ${placedWords} of ${totalWords} words`;
+                    if (remainingWords === 0) {
+                        progressElement.innerHTML = `<span class="text-green-600 font-bold">🎉 Well done! All words placed</span>`;
+                    }
+                } else {
+                    progressElement.textContent = `Ditempatkan ${placedWords} dari ${totalWords} kata`;
+                    if (remainingWords === 0) {
+                        progressElement.innerHTML = `<span class="text-green-600 font-bold">🎉 Bagus! Semua kata ditempatkan</span>`;
+                    }
                 }
             }
         }
@@ -888,52 +1209,68 @@
 
         function updateProgress() {
             const progress = ((currentQuestion + 1) / quizKeys.length) * 100;
+            const t = translations[currentLanguage];
             document.getElementById('progress-bar').style.width = progress + '%';
-            document.getElementById('progress-text').textContent = `السؤال ${currentQuestion + 1} من ${quizKeys.length}`;
+            document.getElementById('progress-text').textContent = t.progressText.replace('{current}', currentQuestion + 1).replace('{total}', quizKeys.length);
         }
 
         function updateNavigationButtons() {
             const prevBtn = document.getElementById('prev-btn');
             const nextBtn = document.getElementById('next-btn');
+            const t = translations[currentLanguage];
             
             if (currentQuestion === 0) {
                 prevBtn.classList.add('hidden');
             } else {
                 prevBtn.classList.remove('hidden');
+                prevBtn.textContent = t.previous;
             }
             
             if (currentQuestion === quizKeys.length - 1) {
-                nextBtn.textContent = 'إنهاء الاختبار 🎯';
+                nextBtn.textContent = t.finish;
             } else {
-                nextBtn.textContent = 'التالي →';
+                nextBtn.textContent = t.next;
             }
         }
 
         function showResults() {
+            // Save quiz result to history
+            saveQuizResult(totalScore);
+            
             document.getElementById('quiz-container').classList.add('slide-out');
             setTimeout(() => {
                 document.getElementById('quiz-container').classList.add('hidden');
                 document.getElementById('results-page').classList.remove('hidden');
                 document.getElementById('results-page').classList.add('fade-in');
                 
+                const t = translations[currentLanguage];
+                
                 // Display results
-                document.getElementById('student-result').textContent = `${studentName}، نتيجتك هي:`;
+                document.getElementById('student-result').textContent = t.yourResult.replace('{name}', studentName);
                 document.getElementById('score-display').textContent = `${totalScore}/100`;
                 
                 let message = '';
                 if (totalScore >= 90) {
-                    message = 'ممتاز جداً! 🌟';
+                    message = currentLanguage === 'ar' ? 'ممتاز جداً! 🌟' : 
+                             currentLanguage === 'en' ? 'Excellent! 🌟' : 'Luar Biasa! 🌟';
                 } else if (totalScore >= 80) {
-                    message = 'جيد جداً! 👏';
+                    message = currentLanguage === 'ar' ? 'جيد جداً! 👏' : 
+                             currentLanguage === 'en' ? 'Very Good! 👏' : 'Sangat Baik! 👏';
                 } else if (totalScore >= 70) {
-                    message = 'جيد! 👍';
+                    message = currentLanguage === 'ar' ? 'جيد! 👍' : 
+                             currentLanguage === 'en' ? 'Good! 👍' : 'Baik! 👍';
                 } else if (totalScore >= 60) {
-                    message = 'مقبول، حاول مرة أخرى! 💪';
+                    message = currentLanguage === 'ar' ? 'مقبول، حاول مرة أخرى! 💪' : 
+                             currentLanguage === 'en' ? 'Acceptable, try again! 💪' : 'Cukup, coba lagi! 💪';
                 } else {
-                    message = 'تحتاج للمزيد من المراجعة! 📚';
+                    message = currentLanguage === 'ar' ? 'تحتاج للمزيد من المراجعة! 📚' : 
+                             currentLanguage === 'en' ? 'Need more practice! 📚' : 'Perlu lebih banyak latihan! 📚';
                 }
                 
                 document.getElementById('score-message').textContent = message;
+                
+                // Update restart button text
+                document.querySelector('#results-page button').textContent = t.restartQuiz;
                 
                 // Start fireworks animation
                 createFireworks();
@@ -972,6 +1309,9 @@
                 document.getElementById('welcome-page').classList.remove('hidden');
                 document.getElementById('welcome-page').classList.add('fade-in');
                 document.getElementById('student-name').value = '';
+                
+                // Reload progress history to show updated stats
+                loadProgressHistory();
             }, 600);
         }
 
@@ -1017,5 +1357,5 @@
         `;
         document.head.appendChild(style);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a55c6d00cf0fad',t:'MTc1OTc1NTgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a568b4d5bfb5e7',t:'MTc1OTc1NjMzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
