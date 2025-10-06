@@ -145,11 +145,195 @@
             border-image: linear-gradient(45deg, #2dd4bf, #fbbf24, #2dd4bf) 1;
         }
 
+        /* Drag and Drop Styles */
+        .drag-container {
+            min-height: 400px;
+            padding: 20px;
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.05), rgba(251, 191, 36, 0.05));
+            transition: all 0.3s ease;
+        }
+
+        .drag-container.drag-over {
+            border-color: #2dd4bf;
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.15), rgba(251, 191, 36, 0.15));
+            transform: scale(1.02);
+        }
+
+        .draggable-word {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 8px;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            cursor: grab;
+            user-select: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #374151;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .draggable-word:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .draggable-word:hover:before {
+            left: 100%;
+        }
+
+        .draggable-word:hover {
+            transform: translateY(-3px) rotate(2deg);
+            box-shadow: 0 8px 25px rgba(45, 212, 191, 0.3);
+            border-color: #2dd4bf;
+        }
+
+        .draggable-word:active {
+            cursor: grabbing;
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .draggable-word.dragging {
+            opacity: 0.7;
+            transform: rotate(10deg) scale(1.1);
+            z-index: 1000;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .drop-zone {
+            min-height: 120px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px dashed #cbd5e1;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .drop-zone:before {
+            content: attr(data-category);
+            position: absolute;
+            top: -12px;
+            right: 15px;
+            background: linear-gradient(135deg, #2dd4bf, #0891b2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #2dd4bf;
+            background: rgba(45, 212, 191, 0.1);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
+        }
+
+        .drop-zone.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            animation: correctPulse 0.6s ease;
+        }
+
+        .drop-zone.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            animation: shake 0.6s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .word-bank {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+            border: 2px dashed #fbbf24;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .word-bank h3 {
+            color: #92400e;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .category-container {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .success-animation {
+            animation: successBounce 0.8s ease;
+        }
+
+        @keyframes successBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .completion-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #10b981;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .completion-indicator.show {
+            transform: scale(1);
+        }
+
         @media (max-width: 768px) {
             .calligraphy-bg {
                 font-size: 4rem;
                 top: 5%;
                 right: 2%;
+            }
+            
+            .draggable-word {
+                font-size: 1rem;
+                padding: 10px 15px;
+                margin: 5px;
+            }
+            
+            .category-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -200,7 +384,7 @@
                 <div id="progress-bar" class="progress-bar h-3 rounded-full" style="width: 0%"></div>
             </div>
             <div class="text-center mt-2">
-                <span id="progress-text" class="text-gray-700 font-semibold">السؤال 1 من 5</span>
+                <span id="progress-text" class="text-gray-700 font-semibold">السؤال 1 من 10</span>
             </div>
         </div>
 
@@ -259,31 +443,92 @@
                 title: "المفرد (Singular)",
                 description: "اختر الكلمات التي تدل على المفرد",
                 words: ["كِتَابٌ", "وَلَدٌ", "بَيْتٌ", "قَلَمٌ", "مُعَلِّمٌ"],
-                distractors: ["كِتَابَانِ", "أَوْلَادٌ", "بُيُوتٌ", "مُعَلِّمُونَ"]
+                distractors: ["كِتَابَانِ", "أَوْلَادٌ", "بُيُوتٌ", "مُعَلِّمُونَ"],
+                type: "multiple-choice"
             },
             tatsniyyah: {
                 title: "المثنى (Dual)",
                 description: "اختر الكلمات التي تدل على المثنى",
                 words: ["كِتَابَانِ", "وَلَدَانِ", "بَيْتَانِ", "قَلَمَانِ", "مُعَلِّمَانِ"],
-                distractors: ["كِتَابٌ", "أَوْلَادٌ", "بُيُوتٌ", "مُعَلِّمُونَ"]
+                distractors: ["كِتَابٌ", "أَوْلَادٌ", "بُيُوتٌ", "مُعَلِّمُونَ"],
+                type: "multiple-choice"
             },
             jamak_muzakkar_salim: {
                 title: "جمع المذكر السالم (Regular Masculine Plural)",
                 description: "اختر الكلمات التي تدل على جمع المذكر السالم",
                 words: ["مُعَلِّمُونَ", "مُسْلِمُونَ", "كَاتِبُونَ", "طَالِبُونَ", "عَامِلُونَ"],
-                distractors: ["مُعَلِّمَاتٌ", "كُتُبٌ", "أَوْلَادٌ", "بُيُوتٌ"]
+                distractors: ["مُعَلِّمَاتٌ", "كُتُبٌ", "أَوْلَادٌ", "بُيُوتٌ"],
+                type: "multiple-choice"
             },
             jamak_muannats_salim: {
                 title: "جمع المؤنث السالم (Regular Feminine Plural)",
                 description: "اختر الكلمات التي تدل على جمع المؤنث السالم",
                 words: ["مُعَلِّمَاتٌ", "مُسْلِمَاتٌ", "كَاتِبَاتٌ", "طَالِبَاتٌ", "عَامِلَاتٌ"],
-                distractors: ["مُعَلِّمُونَ", "كُتُبٌ", "أَوْلَادٌ", "بُيُوتٌ"]
+                distractors: ["مُعَلِّمُونَ", "كُتُبٌ", "أَوْلَادٌ", "بُيُوتٌ"],
+                type: "multiple-choice"
             },
             jamak_taksir: {
                 title: "جمع التكسير (Broken Plural)",
                 description: "اختر الكلمات التي تدل على جمع التكسير",
                 words: ["كُتُبٌ", "بُيُوتٌ", "أَوْلَادٌ", "أَقْلَامٌ", "رِجَالٌ"],
-                distractors: ["مُعَلِّمُونَ", "مُعَلِّمَاتٌ", "كِتَابَانِ", "وَلَدَانِ"]
+                distractors: ["مُعَلِّمُونَ", "مُعَلِّمَاتٌ", "كِتَابَانِ", "وَلَدَانِ"],
+                type: "multiple-choice"
+            },
+            // New Drag & Drop Pages
+            drag_mufrad_tatsniyyah: {
+                title: "صنف الكلمات: المفرد والمثنى",
+                description: "اسحب كل كلمة إلى المجموعة الصحيحة",
+                type: "drag-drop",
+                categories: {
+                    "المفرد": ["طَالِبٌ", "مَدْرَسَةٌ", "كُرَةٌ"],
+                    "المثنى": ["طَالِبَانِ", "مَدْرَسَتَانِ", "كُرَتَانِ"]
+                },
+                distractors: []
+            },
+            drag_jamak_types: {
+                title: "صنف أنواع الجمع",
+                description: "اسحب كل كلمة إلى نوع الجمع الصحيح",
+                type: "drag-drop",
+                categories: {
+                    "جمع مذكر سالم": ["مُهَنْدِسُونَ", "طَبِيبُونَ"],
+                    "جمع مؤنث سالم": ["مُهَنْدِسَاتٌ", "طَبِيبَاتٌ"],
+                    "جمع تكسير": ["مَهَانِدُ", "أَطِبَّاءُ"]
+                },
+                distractors: []
+            },
+            drag_numbers: {
+                title: "صنف حسب العدد",
+                description: "اسحب الكلمات حسب عددها",
+                type: "drag-drop",
+                categories: {
+                    "واحد": ["شَجَرَةٌ", "نَجْمٌ"],
+                    "اثنان": ["شَجَرَتَانِ", "نَجْمَانِ"],
+                    "أكثر من اثنين": ["أَشْجَارٌ", "نُجُومٌ"]
+                },
+                distractors: []
+            },
+            drag_gender_number: {
+                title: "صنف حسب الجنس والعدد",
+                description: "اسحب الكلمات إلى المجموعة المناسبة",
+                type: "drag-drop",
+                categories: {
+                    "مذكر جمع": ["مُعَلِّمُونَ", "كُتَّابٌ"],
+                    "مؤنث جمع": ["مُعَلِّمَاتٌ", "كَاتِبَاتٌ"],
+                    "مختلط": ["طُلَّابٌ", "أَطْفَالٌ"]
+                },
+                distractors: []
+            },
+            drag_advanced_classification: {
+                title: "التصنيف المتقدم",
+                description: "اسحب كل كلمة إلى تصنيفها النحوي الدقيق",
+                type: "drag-drop",
+                categories: {
+                    "مفرد مذكر": ["رَجُلٌ", "بَابٌ"],
+                    "مفرد مؤنث": ["امْرَأَةٌ", "نَافِذَةٌ"],
+                    "مثنى": ["رَجُلَانِ", "امْرَأَتَانِ"],
+                    "جمع": ["رِجَالٌ", "نِسَاءٌ"]
+                },
+                distractors: []
             }
         };
 
@@ -315,6 +560,17 @@
             const quizKey = quizKeys[currentQuestion];
             const questionData = quizData[quizKey];
             
+            if (questionData.type === 'drag-drop') {
+                generateDragDropPage(questionData);
+            } else {
+                generateMultipleChoicePage(questionData, quizKey);
+            }
+            
+            updateProgress();
+            updateNavigationButtons();
+        }
+
+        function generateMultipleChoicePage(questionData, quizKey) {
             // Create mixed options (correct + distractors)
             const allOptions = [...questionData.words, ...questionData.distractors];
             const shuffledOptions = shuffleArray(allOptions);
@@ -345,8 +601,72 @@
             `;
             
             document.getElementById('quiz-pages').innerHTML = quizHTML;
-            updateProgress();
-            updateNavigationButtons();
+        }
+
+        function generateDragDropPage(questionData) {
+            const categories = Object.keys(questionData.categories);
+            const allWords = [];
+            
+            // Collect all words from categories
+            categories.forEach(category => {
+                questionData.categories[category].forEach(word => {
+                    allWords.push({ word, category });
+                });
+            });
+            
+            const shuffledWords = shuffleArray(allWords);
+            
+            const quizHTML = `
+                <div class="quiz-card rounded-3xl p-8 fade-in">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">${questionData.title}</h2>
+                        <p class="text-lg text-gray-600 mb-6">${questionData.description}</p>
+                        <div class="text-sm text-gray-500">اسحب كل كلمة إلى المجموعة المناسبة</div>
+                    </div>
+                    
+                    <!-- Word Bank -->
+                    <div class="word-bank">
+                        <h3>🎯 بنك الكلمات</h3>
+                        <div id="word-bank-container">
+                            ${shuffledWords.map((item, index) => `
+                                <div 
+                                    class="draggable-word" 
+                                    draggable="true"
+                                    data-word="${item.word}"
+                                    data-correct-category="${item.category}"
+                                    ondragstart="dragStart(event)"
+                                    ondragend="dragEnd(event)"
+                                >
+                                    ${item.word}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Drop Zones -->
+                    <div class="category-container" style="grid-template-columns: repeat(${Math.min(categories.length, 3)}, 1fr);">
+                        ${categories.map(category => `
+                            <div 
+                                class="drop-zone" 
+                                data-category="${category}"
+                                ondrop="drop(event)" 
+                                ondragover="allowDrop(event)"
+                                ondragenter="dragEnter(event)"
+                                ondragleave="dragLeave(event)"
+                            >
+                                <div class="completion-indicator">✓</div>
+                                <div class="text-center text-gray-500 text-sm mb-2">اسحب الكلمات هنا</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="text-center mt-6">
+                        <div id="drag-progress" class="text-sm text-gray-500">تم وضع 0 من ${shuffledWords.length} كلمة</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('quiz-pages').innerHTML = quizHTML;
         }
 
         function selectOption(button, word, quizKey) {
@@ -369,27 +689,61 @@
         }
 
         function nextQuestion() {
-            const selectedButtons = document.querySelectorAll('.option-btn.selected');
-            
-            if (selectedButtons.length !== 3) {
-                alert('من فضلك اختر 3 كلمات');
-                return;
-            }
-
-            // Calculate score for current question
             const quizKey = quizKeys[currentQuestion];
-            const correctWords = quizData[quizKey].words;
-            const selectedWords = Array.from(selectedButtons).map(btn => btn.textContent.trim());
+            const questionData = quizData[quizKey];
             
-            let questionScore = 0;
-            selectedWords.forEach(word => {
-                if (correctWords.includes(word)) {
-                    questionScore += 20/3; // Each correct answer worth ~6.67 points
+            if (questionData.type === 'drag-drop') {
+                // Check if all words are placed
+                const wordBank = document.getElementById('word-bank-container');
+                const remainingWords = wordBank.querySelectorAll('.draggable-word');
+                
+                if (remainingWords.length > 0) {
+                    alert('من فضلك ضع جميع الكلمات في المجموعات المناسبة');
+                    return;
                 }
-            });
-            
-            totalScore += Math.round(questionScore);
-            userAnswers.push(selectedWords);
+                
+                // Calculate drag-drop score
+                const dropZones = document.querySelectorAll('.drop-zone');
+                let correctPlacements = 0;
+                let totalPlacements = 0;
+                
+                dropZones.forEach(zone => {
+                    const category = zone.dataset.category;
+                    const wordsInZone = zone.querySelectorAll('.draggable-word');
+                    
+                    wordsInZone.forEach(word => {
+                        totalPlacements++;
+                        if (word.dataset.correctCategory === category) {
+                            correctPlacements++;
+                        }
+                    });
+                });
+                
+                const questionScore = totalPlacements > 0 ? (correctPlacements / totalPlacements) * 10 : 0;
+                totalScore += Math.round(questionScore);
+                
+            } else {
+                // Multiple choice logic
+                const selectedButtons = document.querySelectorAll('.option-btn.selected');
+                
+                if (selectedButtons.length !== 3) {
+                    alert('من فضلك اختر 3 كلمات');
+                    return;
+                }
+
+                const correctWords = questionData.words;
+                const selectedWords = Array.from(selectedButtons).map(btn => btn.textContent.trim());
+                
+                let questionScore = 0;
+                selectedWords.forEach(word => {
+                    if (correctWords.includes(word)) {
+                        questionScore += 10/3; // Each correct answer worth ~3.33 points
+                    }
+                });
+                
+                totalScore += Math.round(questionScore);
+                userAnswers.push(selectedWords);
+            }
 
             if (currentQuestion < quizKeys.length - 1) {
                 currentQuestion++;
@@ -401,6 +755,125 @@
                 }, 300);
             } else {
                 showResults();
+            }
+        }
+
+        // Drag and Drop Functions
+        let draggedElement = null;
+
+        function dragStart(event) {
+            draggedElement = event.target;
+            event.target.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/html', event.target.outerHTML);
+        }
+
+        function dragEnd(event) {
+            event.target.classList.remove('dragging');
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function dragEnter(event) {
+            event.preventDefault();
+            if (event.target.classList.contains('drop-zone')) {
+                event.target.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(event) {
+            if (event.target.classList.contains('drop-zone')) {
+                event.target.classList.remove('drag-over');
+            }
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const dropZone = event.target.closest('.drop-zone');
+            
+            if (dropZone && draggedElement) {
+                dropZone.classList.remove('drag-over');
+                
+                // Clone the dragged element
+                const clonedElement = draggedElement.cloneNode(true);
+                clonedElement.draggable = false;
+                clonedElement.classList.remove('dragging');
+                clonedElement.classList.add('success-animation');
+                
+                // Add click to remove functionality
+                clonedElement.onclick = function() {
+                    returnWordToBank(this);
+                };
+                
+                // Remove the original element from word bank
+                draggedElement.remove();
+                
+                // Add to drop zone
+                dropZone.appendChild(clonedElement);
+                
+                // Check if category is complete
+                const category = dropZone.dataset.category;
+                const quizKey = quizKeys[currentQuestion];
+                const questionData = quizData[quizKey];
+                const expectedWords = questionData.categories[category];
+                const wordsInZone = dropZone.querySelectorAll('.draggable-word');
+                
+                if (wordsInZone.length === expectedWords.length) {
+                    dropZone.querySelector('.completion-indicator').classList.add('show');
+                    dropZone.classList.add('correct');
+                    setTimeout(() => dropZone.classList.remove('correct'), 600);
+                }
+                
+                updateDragProgress();
+                draggedElement = null;
+            }
+        }
+
+        function returnWordToBank(wordElement) {
+            const wordBank = document.getElementById('word-bank-container');
+            const clonedElement = wordElement.cloneNode(true);
+            
+            // Restore draggable functionality
+            clonedElement.draggable = true;
+            clonedElement.onclick = null;
+            clonedElement.ondragstart = dragStart;
+            clonedElement.ondragend = dragEnd;
+            clonedElement.classList.remove('success-animation');
+            
+            // Remove from drop zone
+            wordElement.remove();
+            
+            // Add back to word bank
+            wordBank.appendChild(clonedElement);
+            
+            // Update completion indicators
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                const wordsInZone = zone.querySelectorAll('.draggable-word');
+                const indicator = zone.querySelector('.completion-indicator');
+                if (wordsInZone.length === 0) {
+                    indicator.classList.remove('show');
+                }
+            });
+            
+            updateDragProgress();
+        }
+
+        function updateDragProgress() {
+            const progressElement = document.getElementById('drag-progress');
+            if (progressElement) {
+                const wordBank = document.getElementById('word-bank-container');
+                const totalWords = document.querySelectorAll('.draggable-word').length;
+                const remainingWords = wordBank.querySelectorAll('.draggable-word').length;
+                const placedWords = totalWords - remainingWords;
+                
+                progressElement.textContent = `تم وضع ${placedWords} من ${totalWords} كلمة`;
+                
+                if (remainingWords === 0) {
+                    progressElement.innerHTML = `<span class="text-green-600 font-bold">🎉 أحسنت! تم وضع جميع الكلمات</span>`;
+                }
             }
         }
 
@@ -544,5 +1017,5 @@
         `;
         document.head.appendChild(style);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a54c7213880fad',t:'MTc1OTc1NTE3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a55c6d00cf0fad',t:'MTc1OTc1NTgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
